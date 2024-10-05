@@ -14,10 +14,7 @@ class User(Base):
     fio = sqlalchemy.Column(sqlalchemy.String)
     competencies = sqlalchemy.Column(sqlalchemy.String)
     role = sqlalchemy.Column(sqlalchemy.String, default="user") # admin, expert, user
-<<<<<<< HEAD
     complited_projects = sqlalchemy.Column(sqlalchemy.JSON)
-=======
->>>>>>> ed95fa5870796f670d147be489f9ca1f0d69f94f
 
     def to_dict(self):
         return {
