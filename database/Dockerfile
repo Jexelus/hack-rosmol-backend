@@ -1,0 +1,8 @@
+FROM postgres:13.4
+
+ENV POSTGRES_USER=rosmol
+ENV POSTGRES_PASSWORD=rootroot
+ENV POSTGRES_DB=rosmol
+ENV POSTGRES_PORT=8001
+
+CMD ["postgres"]
