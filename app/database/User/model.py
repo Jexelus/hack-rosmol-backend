@@ -14,7 +14,9 @@ class User(Base):
     fio = sqlalchemy.Column(sqlalchemy.String)
     competencies = sqlalchemy.Column(sqlalchemy.String)
     role = sqlalchemy.Column(sqlalchemy.String, default="user") # admin, expert, user
-    complited_projects = sqlalchemy.Column(sqlalchemy.JSON)
+    complited_projects = sqlalchemy.Column(sqlalchemy.JSON, default="[]")
+    invites = sqlalchemy.Column(sqlalchemy.JSON, default="[]")
+    team_id = sqlalchemy.Column(sqlalchemy.Integer)
 
     def to_dict(self):
         return {
@@ -22,7 +24,11 @@ class User(Base):
             "last_project_id": self.last_project_id,
             "fio": self.fio,
             "email": self.email,
-            "competencies": self.competencies
+            "competencies": self.competencies,
+            "complited_projects": json.loads(self.complited_projects),
+            "role": self.role,
+            "invites": json.loads(self.invites),
+            "team_id": self.team_id
         }
 
 Base.metadata.create_all(engine)

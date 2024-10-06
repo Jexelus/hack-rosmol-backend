@@ -10,9 +10,11 @@ DATABASE_URL = "postgresql://rosmol:rootroot@192.168.1.47:8001/rosmol"
 
 from database.User.model import User
 from database.Project.model import Project
+from database.Team.model import Team
 
 pdUser = sqlalchemy_to_pydantic(User, exclude=['role'])
 pdProject = sqlalchemy_to_pydantic(Project)
+pdTeam = sqlalchemy_to_pydantic(Team)
 
 
 engine = create_engine(DATABASE_URL)

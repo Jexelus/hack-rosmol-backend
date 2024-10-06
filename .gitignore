@@ -2,3 +2,6 @@
 /database/postgres_data
 /app/env
 /tgbot/.env
+/nginx/certs/cert.pem
+/nginx/certs/fullchain.pem
+/nginx/certs/privkey.pem
