@@ -7,7 +7,7 @@ bot = telebot.TeleBot("7586843035:AAFoDA2w2au7UHhWqs36_yc7lGrsHcnv9K4")
 
 # Словарь для хранения данных пользователя
 user_progress = {}
-coins = []
+coins = {'username': "", 'coins': 0, 'is_completed': False, 'guessed_word_list': []}
 
 # Данные курса
 course_data = [
@@ -75,7 +75,7 @@ course_data = [
 def start(message):
     user_id = message.chat.id
     username = message.from_user.username
-    coins.append({'username':f"{username}", 'coins': 0})
+    coins['username'] = f"{username}"
     print(coins)
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     user_progress[user_id] = 0
@@ -92,13 +92,23 @@ def check_kurs(message):
     keyboard.add(kurs1)
     bot.send_message(message.chat.id, "Выберите курс, который хотите освоить 🤔", reply_markup=keyboard)
 
+# Первый раздел теории курса
 def main_task1(message):
     user_id = message.chat.id
-    for point in course_data:
-        bot.send_message(user_id, f"{point['section']}\n\n{point['theory1']}")
-        time.sleep(8)   #  хуйня, нужна кнопка для выброса следующего блока
-        bot.send_message(user_id, f"{point['theory2']}")
-        time.sleep(10)
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+    next_point = "Следующий раздел ⏭️"
+    no = "Главное меню 🏘"
+    markup.add(next_point,no)
+    bot.send_message(user_id, f"{course_data[0]['section']}\n\n{course_data[0]['theory1']}")
+    time.sleep(5)
+    bot.send_message(user_id, f"{course_data[0]['theory2']}", reply_markup=markup)
+
+# Второй раздел теории курса
+def main_task2(message):
+    user_id = message.chat.id
+    bot.send_message(user_id, f"{course_data[1]['section']}\n\n{course_data[1]['theory1']}")
+    time.sleep(5)
+    bot.send_message(user_id, f"{course_data[1]['theory2']}")
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
     yes = "Да ✅"
     no = "Главное меню 🏘"
@@ -111,12 +121,15 @@ def check_tests(message):
     bot.send_message(user_id, "https://forms.yandex.ru/u/6701e59a90fa7b46fa27d829/")
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(types.KeyboardButton("Главное меню 🏘"))
-    time.sleep(15)    # можно наебывать, надо чтобы как-то ловилось прошел чел или нет
-    bot.send_message(user_id, "Поздравляю, вы прошли курс! Вам начислено 100 скиллкоинов! ⭐⭐⭐",reply_markup=markup)    
-    for user in coins:
-        if user['username'] == username:
-            coin = user['coins']
-            user['coins'] = user['coins']+100
+    time.sleep(15) 
+    if coins['is_completed'] == False:
+        bot.send_message(user_id, "Поздравляю, вы прошли курс! Вам начислено 100 скиллкоинов! ⭐⭐⭐",reply_markup=markup)
+    else: 
+        bot.send_message(user_id, "Данный курс уже был пройден 💚",reply_markup=markup)
+    if coins['username'] == username and coins['is_completed'] == False:
+        coins['coins'] += 100
+        coins['is_completed'] = True
+        print(coins)
 
 def main_menu(message):
     user_id = message.chat.id
@@ -133,28 +146,36 @@ def check_coins(message):
     username = message.from_user.username
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add("Главное меню 🏘")
-    coin = 0
-    for user in coins:
-        if user['username'] == username:
-            coin = user['coins']
-    bot.send_message(user_id, f"Ваше кол-во коинов - {coin} ⭐", reply_markup=keyboard)
+    bot.send_message(user_id, f"Ваше кол-во коинов - {coins['coins']} ⭐", reply_markup=keyboard)
     
 def mini_game(message):
     user_id = message.chat.id
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add("Главное меню 🏘")
-    bot.send_message(user_id, "Составьте 4 слова, которые можно составить из слова «проект»", reply_markup=keyboard)
+    rules = """
+Исходное слово: Игроки берут слово "проект".
+Длина слов: Все созданные слова должны состоять ровно из пяти букв.
+Использование букв: Буквы могут использоваться только в том количестве, в каком они присутствуют в слове "проект". Например, буква "о" может использоваться только один раз.
+Запрещенные слова: Не допускаются слова, которые не существуют в русском языке или являются собственными именам
+Начинайте 🔰
+"""
+    bot.send_message(user_id, rules, reply_markup=keyboard)
     
 def mini_game_coin(message):
     user_id = message.chat.id
     username = message.from_user.username
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add("Главное меню 🏘")
-    for user in coins:
-        if user['username'] == username:
-            coin = user['coins']
-            user['coins'] = user['coins']+20
+    if coins['username'] == username:
+        coins['coins'] += 20
     bot.send_message(user_id, "Вы заработали 20 скиллкоинов! ⭐", reply_markup=keyboard)
+
+def mini_game_coin_guessed(message):
+    user_id = message.chat.id
+    username = message.from_user.username
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard.add("Главное меню 🏘")
+    bot.send_message(user_id, "Данное слово уже было угадано 💚", reply_markup=keyboard)
 
 def mini_game_coin_wrong(message):
     user_id = message.chat.id
@@ -165,12 +186,13 @@ def mini_game_coin_wrong(message):
 
 @bot.message_handler(content_types=['text'])
 def func(message):
-    word_list = ["копер", "протек", "потек", "покер"]
+    global coins
+    word_list = ["копер", "протек", "потек", "покер", "кот", "ток", "трек", "пот", "рок", "рот", "крот"]
     guessed_word_list = []
     if message.text  == "Выбрать курс 🤔":
         check_kurs(message)
     elif message.text =="Основы проектной деятельности":
-        main_task1(message)
+            main_task1(message)
     elif message.text == "Да ✅":
         check_tests(message)
     elif message.text == "Главное меню 🏘":
@@ -179,18 +201,16 @@ def func(message):
         check_coins(message)
     elif message.text == "Мини-игра 🎲":
         mini_game(message)
-    elif message.text.lower() in word_list:
+    elif message.text == "Следующий раздел ⏭️": #добавлена ф-ция
+        main_task2(message)
+    elif message.text.lower() in word_list and message.text.lower() not in coins['guessed_word_list']:
             mini_game_coin(message)
+            coins['guessed_word_list'].append(message.text.lower())
+            print(coins)
+    elif message.text.lower() in coins['guessed_word_list']:
+        mini_game_coin_guessed(message)
     elif message.text.lower() not in word_list:
             mini_game_coin_wrong(message)
-    # elif message.text.lower() == "копер":
-    #     mini_game_coin(message)
-    # elif message.text.lower() == "протек":
-    #     mini_game_coin(message)
-    # elif message.text.lower() == "потек":
-    #     mini_game_coin(message)
-    # elif message.text.lower() == "покер":
-    #     mini_game_coin(message)
-    
+
 if __name__ == '__main__':
     bot.polling(none_stop=True)
