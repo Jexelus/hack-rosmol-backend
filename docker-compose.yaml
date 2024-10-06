@@ -2,32 +2,32 @@ version: '3.8'
 
 services:
 
-  rosmol-db:
-    image: postgres:13.4
-    ports:
-      - "192.168.1.47:8001:5432"
-    volumes:
-      - ./database/postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=rosmol
-      - POSTGRES_PASSWORD=rootroot
-      - POSTGRES_DB=rosmol
-    restart: always
-    networks:
-      - rosmol-network
+  # rosmol-db:
+  #   image: postgres:13.4
+  #   ports:
+  #     - "192.168.1.47:8001:5432"
+  #   volumes:
+  #     - ./database/postgres_data:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_USER=rosmol
+  #     - POSTGRES_PASSWORD=rootroot
+  #     - POSTGRES_DB=rosmol
+  #   restart: always
+  #   networks:
+  #     - rosmol-network
 
-  rosmol-app:
-    image: rosmol-app
-    build:
-      context: ./app
-      dockerfile: ./Dockerfile
-    ports:
-      - "8000:8000"
-    depends_on:
-      - rosmol-db
-    restart: always
-    networks:
-      - rosmol-network
+  # rosmol-app:
+  #   image: rosmol-app
+  #   build:
+  #     context: ./app
+  #     dockerfile: ./Dockerfile
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - rosmol-db
+  #   restart: always
+  #   networks:
+  #     - rosmol-network
 
   rosmol-tg-bot:
     image: rosmol-telegram-bot
