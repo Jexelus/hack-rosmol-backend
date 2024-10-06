@@ -14,24 +14,37 @@ def get_Projects_by_author_id_with_pagination(author_id, page_size=10, page=1):
         resp = []
         for Project in data:
             resp.append(Project.to_dict())
+
+        if len(resp) == 0:
+            return None
+
         return resp
     
-def new_Project(
-    author_id,
-):
+def new_Project(data):
     with new_session() as session:
-        session.add(Project(
-            author_id=author_id,
+        roles = json.dumps(data["roles"])
+        mentors = json.dumps(data["mentors"])
+        expireance_of_projects = json.dumps(data["expireance_of_projects"])
+        del data["roles"]
+        del data["mentors"]
+        del data["expireance_of_projects"]
+        proj = Project(
+            **data,
             creation_time_unix=time.time(),
-        ))
+            roles=roles,
+            mentors=mentors,
+            expireance_of_projects=expireance_of_projects
+        )
+        session.add(proj)
         session.commit()
+    return proj.to_dict()
 
 def delete_Project(Project_id):
     with new_session() as session:
-        Project = session.query(Project).filter_by(id=Project_id)
-        Project.delete()
+        project = session.query(Project).filter_by(id=Project_id)
+        project.delete()
         session.commit()
-        return Project.id 
+        return project.to_dict()
     
 def update_Project(Project_id, data):
     with new_session() as session:
@@ -48,6 +61,56 @@ def get_Projects_with_pagination(page_size=10, page=1):
     with new_session() as session:
         data = session.query(Project).limit(page_size).offset((page - 1) * page_size).all()
         resp = []
-        for Project in data:
-            resp.append(Project.to_dict())
+        for proj in data:
+            resp.append(proj.to_dict())
+
+        if len(resp) == 0:
+            return None
+
+        return resp
+    
+def get_Projects_by_category_with_pagination(category, page_size=10, page=1):
+    with new_session() as session:
+        data = session.query(Project).filter_by(category=category).limit(page_size).offset((page - 1) * page_size).all()
+        resp = []
+        for proj in data:
+            resp.append(proj.to_dict())
+
+        if len(resp) == 0:
+            return None
+
+        return resp
+    
+def get_all_projects():
+    with new_session() as session:
+        data = session.query(Project).all()
+        resp = []
+        for proj in data:
+            resp.append(proj.to_dict())
+
+        if len(resp) == 0:
+            return None
+
+        return resp
+    
+def get_projects_by_category(category):
+    with new_session() as session:
+        data = session.query(Project).filter_by(category=category).all()
+        resp = []
+        for proj in data:
+            resp.append(proj.to_dict())
+
+        if len(resp) == 0:
+            return None
+        
+        return resp
+    
+def get_projects_by_category_with_pagination(category, page_size=10, page=1):
+    with new_session() as session:
+        data = session.query(Project).filter_by(category=category).limit(page_size).offset((page - 1) * page_size).all()
+        resp = []
+        for proj in data:
+            resp.append(proj.to_dict())
+        if len(resp) == 0:
+            return None
         return resp

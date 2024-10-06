@@ -33,6 +33,7 @@ class Project(Base):
     expireance_of_projects = sqlalchemy.Column(sqlalchemy.JSON) # { ["1", "2", "3"] } # id of projects
     perspective_of_project = sqlalchemy.Column(sqlalchemy.String) # основа идеи и её перспективы
     project_state = sqlalchemy.Column(sqlalchemy.String) # статус идеи
+    team_id = sqlalchemy.Column(sqlalchemy.Integer)
 
     def to_dict(self):
         dt_object = datetime.datetime.fromtimestamp(self.creation_time_unix)
@@ -55,7 +56,7 @@ class Project(Base):
             "issue_description": self.issue_description,
             "project_people_group_target": self.project_people_group_target,
             "project_target": self.project_target,
-            "expireance_of_projects": self.expireance_of_projects,
+            "expireance_of_projects": json.loads(self.expireance_of_projects),
             "perspective_of_project": self.perspective_of_project,
             "project_state": self.project_state
         }

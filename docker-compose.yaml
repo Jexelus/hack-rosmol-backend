@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/certs:/etc/nginx/certs
+    restart: always
+    networks:
+      - rosmol-network
 
   rosmol-db:
     image: postgres:13.4
@@ -23,6 +34,7 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "8000:8000"
+    container_name: rosmol-app
     depends_on:
       - rosmol-db
     restart: always
