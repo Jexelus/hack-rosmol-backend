@@ -1,6 +1,3 @@
-[submodule "app/frontend"]
-	path = app/frontend
-	url = https://github.com/gitUserNameAlex/hack-rosmol-frontend
 [submodule "frontend"]
 	path = frontend
-	url = https://github.com/gitUserNameAlex/hack-rosmol-frontend
+	url = https://github.com/Jexelus/hack-rosmol-frontend
