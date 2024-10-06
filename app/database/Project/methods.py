@@ -114,3 +114,13 @@ def get_projects_by_category_with_pagination(category, page_size=10, page=1):
         if len(resp) == 0:
             return None
         return resp
+    
+def get_projects_by_author_id(author_id):
+    with new_session() as session:
+        data = session.query(Project).filter_by(author_id=author_id).all()
+        resp = []
+        for proj in data:
+            resp.append(proj.to_dict())
+        if len(resp) == 0:
+            return None
+        return resp

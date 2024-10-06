@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import ORJSONResponse, FileResponse
 from database.database import pdProject, pdUser, pdTeam
 from database.User.methods import create_user, get_user_by_vk_id, update_last_project_id, accept_invite, leave_team
 from database.Project.methods import (new_Project, 
@@ -12,7 +12,8 @@ from database.Project.methods import (new_Project,
                                       get_Projects_by_category_with_pagination,
                                       get_all_projects,
                                       get_projects_by_category,
-                                      get_projects_by_category_with_pagination)
+                                      get_projects_by_category_with_pagination,
+                                      get_projects_by_author_id)
 
 from database.Team.methods import create_team, get_team_by_id, new_project_in_team, all_teams, update_team, delete_team
 
@@ -30,6 +31,18 @@ origins = [
     "http://127.0.0.1:8090",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5500",
+    "https://localhost",
+    "https://localhost:8080",
+    "https://localhost:8090",
+    "https://localhost:3000",
+    "https://127.0.0.1",
+    "https://127.0.0.1:8080",
+    "https://127.0.0.1:8090",
+    "https://127.0.0.1:3000",
+    "https://127.0.0.1:5500",
+    "https://vk.com",
+    "https://api.vk.com",
+    "https://aiigh.space"
 ]
 
 app.add_middleware(
@@ -44,7 +57,7 @@ app.add_middleware(
 async def root():
     return ORJSONResponse({"message": "Hello World"}, status_code=200)
 
-@app.post("/user/create/", response_model=pdUser, responses={
+@app.post("/user/create/", responses={
     409: {
         "description": "User already exists", "content": {
         "application/json": {
@@ -67,8 +80,10 @@ async def root():
     }
 })
 async def cr_user(request: Request):
+    print(request)
     data = await request.body()
     data = orjson.loads(data)
+    print(data)
     if get_user_by_vk_id(data['vk_id']) is not None:
         return ORJSONResponse(status_code=409, content={"message": "User already exists"})
     user = create_user(data['vk_id'], data['email'], data['fio'], data['competencies'])
@@ -178,7 +193,7 @@ async def update_user(vk_id: int, data: dict):
         return ORJSONResponse(status_code=404, content={"message": "User not found"})
     return ORJSONResponse(status_code=200, content=update_last_project_id(vk_id, data))
 
-@app.post("/Project/create/", response_model=pdProject, responses={
+@app.post("/Project/create/", responses={
     200:{
         "description": "Project created",
         "content": {
@@ -425,6 +440,14 @@ async def get_Projects_by_category_with_pag(category: str, page: int=1, page_siz
         return ORJSONResponse(status_code=404, content={"message": "Projects not found"})
     return ORJSONResponse(Projects, status_code=200)
 
+@app.get("/Projects/{vk_id}/")
+async def get_Project_by_id(vk_id: int):
+    proj = get_projects_by_author_id(vk_id)
+    if proj is None:
+        return ORJSONResponse(status_code=404, content={"message": "Project not found"})
+    return ORJSONResponse(proj, status_code=200)
+
+
 @app.post("/team/create/", response_model=pdTeam, responses={
     200:{
         "description": "Team created",
@@ -580,6 +603,14 @@ async def del_team(team_id: int):
     if team is None:
         return ORJSONResponse(status_code=404, content={"message": "Team not found"})
     return ORJSONResponse(status_code=200, content=delete_team(team_id))
+
+@app.get("/img/{img_id}/")
+async def get_img(img_id: int):
+    import os
+    if not os.path.exists(f"./img/{img_id}.jpg"):
+        return ORJSONResponse(status_code=404, content={"message": "Image not found"})
+    
+    return FileResponse(f"./img/{img_id}.jpg", media_type="image/jpg")
 
 if __name__ == "__main__":
     import uvicorn
