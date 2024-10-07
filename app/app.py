@@ -13,7 +13,8 @@ from database.Project.methods import (new_Project,
                                       get_all_projects,
                                       get_projects_by_category,
                                       get_projects_by_category_with_pagination,
-                                      get_projects_by_author_id)
+                                      get_projects_by_author_id,
+                                      get_categories)
 
 from database.Team.methods import create_team, get_team_by_id, new_project_in_team, all_teams, update_team, delete_team
 
@@ -611,6 +612,10 @@ async def get_img(img_id: int):
         return ORJSONResponse(status_code=404, content={"message": "Image not found"})
     
     return FileResponse(f"./img/{img_id}.jpg", media_type="image/jpg")
+
+@app.get("/categories/")
+async def get_categor():
+    return ORJSONResponse(get_categories(), status_code=200)
 
 if __name__ == "__main__":
     import uvicorn

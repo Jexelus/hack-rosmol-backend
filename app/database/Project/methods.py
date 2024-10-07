@@ -1,3 +1,4 @@
+from sqlalchemy import distinct
 from database.Project.model import Project
 from database.database import new_session
 import time
@@ -124,3 +125,8 @@ def get_projects_by_author_id(author_id):
         if len(resp) == 0:
             return None
         return resp
+    
+def get_categories():
+    with new_session() as session:
+        categories = session.query(Project.category).distinct().all()
+        return [category[0] for category in categories]
