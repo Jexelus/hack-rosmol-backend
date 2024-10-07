@@ -7,7 +7,7 @@ import json
 
 def get_Project_by_id(Project_id):
     with new_session() as session:
-        return session.query(Project).filter_by(id=Project_id).first
+        return session.query(Project).filter_by(id=Project_id).first().to_dict()
     
 def get_Projects_by_author_id_with_pagination(author_id, page_size=10, page=1):
     with new_session() as session:

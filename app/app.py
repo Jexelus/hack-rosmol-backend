@@ -223,7 +223,7 @@ async def create_Project(data: dict):
     
     return ORJSONResponse(status_code=200, content=new_Project(data))
 
-@app.get("/Project/{Project_id}/", response_model=pdProject, responses={
+@app.get("/proj/{Project_id}/", response_model=pdProject, responses={
     404: {
         "description": "Project not found", 
         "content": {
@@ -247,7 +247,7 @@ async def create_Project(data: dict):
         }
     }
 })
-async def get_Project(Project_id: int):
+async def get_project(Project_id: int):
     Project = get_Project_by_id(Project_id)
     if Project is None:
         return ORJSONResponse(status_code=404, content={"message": "Project not found"})
@@ -277,7 +277,7 @@ async def get_Project(Project_id: int):
         }
     }
 })
-async def del_Project(Project_id: int):
+async def del_project(Project_id: int):
     Project = get_Project_by_id(Project_id)
     if Project is None:
         return ORJSONResponse(status_code=404, content={"message": "Project not found"})
@@ -442,7 +442,7 @@ async def get_Projects_by_category_with_pag(category: str, page: int=1, page_siz
     return ORJSONResponse(Projects, status_code=200)
 
 @app.get("/Projects/{vk_id}/")
-async def get_Project_by_id(vk_id: int):
+async def get_project_by_id(vk_id: int):
     proj = get_projects_by_author_id(vk_id)
     if proj is None:
         return ORJSONResponse(status_code=404, content={"message": "Project not found"})
