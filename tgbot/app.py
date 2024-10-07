@@ -1,18 +1,18 @@
 import telebot
 from telebot import types
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
-import time
 import os
 from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
+import time
 
 bot = telebot.TeleBot(os.environ.get('API_KEY'))
 
 # Словарь для хранения данных пользователя
 user_progress = {}
-coins = {'username': "", 'coins': 0, 'is_completed': False, 'guessed_word_list_project': [], 'guessed_word_list_crossword': []}
+coins = []
 
 # Данные курса
 course_data = [
@@ -75,12 +75,18 @@ course_data = [
         }
 ]
 
+#ГДЕ НАПИСАЛ "ИСПРАВИЛ И РАБОТАЕТ", ТАМ ВСЁ ЗБС С ЛИСТОМ, В ДР МЕСТАХ НАДО ИСПРАВЛЯТЬ. НУ А ЩАС Я СПАТЬ
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    #ИЗМЕНИЛ И РАБОТАЕТ
     user_id = message.chat.id
+    k=0
     username = message.from_user.username
-    coins['username'] = f"{username}"
+    for user in coins:
+        if username in user['username']: k+=1
+    if k <= 0:
+        coins.append({'username': username, 'coins': 0, 'is_completed': False, 'guessed_word_list_project': [], 'guessed_word_list_crossword': []})
     print(coins)
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     user_progress[user_id] = 0
@@ -127,14 +133,16 @@ def check_tests(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(types.KeyboardButton("Главное меню 🏘"))
     time.sleep(15) 
-    if coins['is_completed'] == False:
-        bot.send_message(user_id, "Поздравляю, вы прошли курс! Вам начислено 100 скиллкоинов! ⭐⭐⭐",reply_markup=markup)
-        if coins['username'] == username and coins['is_completed'] == False:
-            coins['coins'] += 100
-            coins['is_completed'] = True
-            print(coins)
-    else: 
-        bot.send_message(user_id, "Данный курс уже был пройден 💚",reply_markup=markup)
+    for user in coins:
+        if user['username'] == username:
+            if user['is_completed'] == False:
+                bot.send_message(user_id, "Поздравляю, вы прошли курс! Вам начислено 100 скиллкоинов! ⭐⭐⭐",reply_markup=markup)
+                if user['username'] == username and user['is_completed'] == False:
+                    user['coins'] += 100
+                    user['is_completed'] = True
+                    print(user)
+        else: 
+            bot.send_message(user_id, "Данный курс уже был пройден 💚",reply_markup=markup)
 
 def main_menu(message):
     user_id = message.chat.id
@@ -151,7 +159,9 @@ def check_coins(message):
     username = message.from_user.username
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add("Главное меню 🏘")
-    bot.send_message(user_id, f"Ваше кол-во коинов - {coins['coins']} ⭐", reply_markup=keyboard)
+    for user in coins: #ИЗМЕНИЛ И РАБОТАЕТ
+        if user['username'] == username:
+            bot.send_message(user_id, f"Ваше кол-во коинов - {user['coins']} ⭐", reply_markup=keyboard)
     
 def mini_game(message):
     user_id = message.chat.id
@@ -197,8 +207,10 @@ def mini_game_coin(message):
     username = message.from_user.username
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add("Главное меню 🏘")
-    if coins['username'] == username:
-        coins['coins'] += 20
+    for user in coins:
+        if user['username'] == username:
+            if user['username'] == username:
+                user['coins'] += 20
     bot.send_message(user_id, "Вы заработали 20 скиллкоинов! ⭐", reply_markup=keyboard)
 
 def mini_game_coin_guessed(message):
@@ -226,48 +238,51 @@ def mini_game_coin_wrong(message):
 @bot.message_handler(content_types=['text'])
 def func(message):
     global coins
-    word_list_project = ["копер", "протек", "потек", "покер", "кот", "ток", "трек", "пот", "рок", "рот", "крот", "кто", "ор", "прок", "перо", "корт"]
-    word_list_crossword = ["агропром", "бизнес", "добро", "карьера", "культура", "медиа", "наука", "образование", "патриотизм", "производство", "технологии", "управление", "экология", "проект"]
-    if message.text  == "Выбрать курс 🤔":
-        check_kurs(message)
-    elif message.text =="Основы проектной деятельности":
-            main_task1(message)
-    elif message.text == "Да ✅":
-        check_tests(message)
-    elif message.text == "Главное меню 🏘":
-        main_menu(message)
-    elif message.text == "Скиллкоины 🌟":
-        check_coins(message)
-    elif message.text == "Мини-игры 🎲":
-        mini_game(message)
-    elif message.text == "Игра \"Проект\" 🚀":
-        mini_game_project(message)
-    elif message.text == "Кроссворд-проекторий 🔎":
-        mini_game_crossword(message)
-    elif message.text == "Следующий раздел ⏭️": #добавлена ф-ция
-        main_task2(message)
+    username = message.from_user.username
+    for user in coins:
+        if user['username'] == username:
+            word_list_project = ["копер", "протек", "потек", "покер", "кот", "ток", "трек", "пот", "рок", "рот", "крот", "кто", "ор", "прок", "перо", "корт"]
+            word_list_crossword = ["агропром", "бизнес", "добро", "карьера", "культура", "медиа", "наука", "образование", "патриотизм", "производство", "технологии", "управление", "экология", "проект"]
+            if message.text  == "Выбрать курс 🤔":
+                check_kurs(message)
+            elif message.text =="Основы проектной деятельности":
+                    main_task1(message)
+            elif message.text == "Да ✅":
+                check_tests(message)
+            elif message.text == "Главное меню 🏘":
+                main_menu(message)
+            elif message.text == "Скиллкоины 🌟":
+                check_coins(message)
+            elif message.text == "Мини-игры 🎲":
+                mini_game(message)
+            elif message.text == "Игра \"Проект\" 🚀":
+                mini_game_project(message)
+            elif message.text == "Кроссворд-проекторий 🔎":
+                mini_game_crossword(message)
+            elif message.text == "Следующий раздел ⏭️": #добавлена ф-ция
+                main_task2(message)
 
-    # not in guessed but in list
-    elif message.text.lower() in word_list_crossword and message.text.lower() not in coins['guessed_word_list_crossword']:
-        mini_game_coin(message)
-        coins['guessed_word_list_crossword'].append(message.text.lower())
-        if len(coins['guessed_word_list_crossword']) == 5:
-            mini_game_sticker_pack(message)
-        print(coins)
-    # guessed already
-    elif message.text.lower() in coins['guessed_word_list_crossword']:
-        mini_game_coin_guessed(message)
+            # not in guessed but in list
+            elif message.text.lower() in word_list_crossword and message.text.lower() not in user['guessed_word_list_crossword']:
+                mini_game_coin(message)
+                user['guessed_word_list_crossword'].append(message.text.lower())
+                if len(user['guessed_word_list_crossword']) == 5:
+                    mini_game_sticker_pack(message)
+                print(coins)
+            # guessed already
+            elif message.text.lower() in user['guessed_word_list_crossword']:
+                mini_game_coin_guessed(message)
 
-    # not in guessed but in list
-    elif message.text.lower() in word_list_project and message.text.lower() not in coins['guessed_word_list_project']:
-        mini_game_coin(message)
-        coins['guessed_word_list_project'].append(message.text.lower())
-        print(coins)
-    # guessed already
-    elif message.text.lower() in coins['guessed_word_list_project']:
-        mini_game_coin_guessed(message)
-    elif message.text.lower() not in word_list_project and message.text.lower() not in word_list_crossword:
-        mini_game_coin_wrong(message)
+            # not in guessed but in list
+            elif message.text.lower() in word_list_project and message.text.lower() not in user['guessed_word_list_project']:
+                mini_game_coin(message)
+                user['guessed_word_list_project'].append(message.text.lower())
+                print(coins)
+            # guessed already
+            elif message.text.lower() in user['guessed_word_list_project']:
+                mini_game_coin_guessed(message)
+            elif message.text.lower() not in word_list_project and message.text.lower() not in word_list_crossword:
+                mini_game_coin_wrong(message)
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
