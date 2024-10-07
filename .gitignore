@@ -5,7 +5,5 @@
 /nginx/certs/cert.pem
 /nginx/certs/fullchain.pem
 /nginx/certs/privkey.pem
-<<<<<<< HEAD
 /tgbot/.env
-=======
->>>>>>> 2fedd3a90ff15cba06ce000cd0d86fc16a362d1c
+/frontend/vk-hosting-config.json
